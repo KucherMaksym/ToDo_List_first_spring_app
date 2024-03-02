@@ -5,11 +5,12 @@ import org.springframework.stereotype.Repository;
 import com.example.testspring.model.Task;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
     // Метод для поиска задачи по ее идентификатору
-    Task findById(long id);
+    Optional<Task> findById(long id);
 
     List<Task> findAll();
 
