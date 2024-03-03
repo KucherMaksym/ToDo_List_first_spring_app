@@ -1,7 +1,10 @@
 package com.example.testspring.controller;
 
+import ch.qos.logback.core.net.SyslogOutputStream;
+import com.example.testspring.model.AppUser;
 import com.example.testspring.model.Task;
 import com.example.testspring.service.TaskService;
+import com.example.testspring.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,59 +15,75 @@ import java.util.Optional;
 
 
 @RestController
-@RequestMapping("/tasks")
+@RequestMapping("/{username}/tasks")
 public class TaskController {
 
     private final TaskService taskService;
+    private final UserService userService;
 
     @Autowired
-    public TaskController(TaskService taskService) {
+    public TaskController(TaskService taskService, UserService userService) {
         this.taskService = taskService;
+        this.userService = userService;
     }
 
-//    @GetMapping("/all")
-//    public ResponseEntity<List<Task>> getAllTask() {
-//        List<Task> tasks  = taskService.getAllTask();
-//        return new ResponseEntity<>(tasks, HttpStatus.OK);
-//    }
     @GetMapping("/all")
-    public List<Task> getAllTask() {
-        return taskService.getAllTask();
+    public List<Task> getAllTaskForUser(@PathVariable String username) {
+        AppUser user = userService.getUserByUsername(username);
+        if (user == null) {
+            System.out.println("User with username " + username + " not found");
+        }
+        List<Task> userTasks = user.getUserTasks();
+        return userTasks;
     }
 
     @PostMapping("/create")
-    public Task createTask(@RequestBody Task task) {
-        Task createdTask = taskService.createTask(task);
-        return createdTask;
+    public Task createTask(@PathVariable String username, @RequestBody Task task) {
+        AppUser user = userService.getUserByUsername(username);
+        if (user == null) {
+            System.out.println("User with username " + username + " not found");
+        }
+        task.setAppUser(user);
+        Task newTask = taskService.createTask(task);
+        return newTask;
     }
 
-//    @GetMapping("/{id}")
-//    @ResponseBody
-//    public Optional<Task> getTaskById(@PathVariable long id) {
-//        Optional<Task> task = taskService.getTaskById(id);
-//        if (task.isEmpty()) {
-//            taskNotFound(id);
-//        } else
-//            return task;
-//        return task;
-//    }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getTaskById(@PathVariable long id) {
-        Optional<Task> task = taskService.getTaskById(id);
+    @GetMapping("/{taskId}")
+    public ResponseEntity<?> getTaskById(@PathVariable String username, @PathVariable long taskId) {
+        AppUser user = userService.getUserByUsername(username);
+        if (user == null) {
+            System.out.println("User with username " + username + " not found");
+        }
+        Optional<Task> task = taskService.getTaskById(taskId);
         if (task.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Task number " + id + " is not found."); // Возвращаем статус 404 и ваше сообщение
+                    .body("Task number " + taskId + " is not found for user " + username);
         } else {
-            return ResponseEntity.ok(task.get()); // Возвращаем статус 200 OK и найденную задачу
+            // Проверяем, принадлежит ли задача указанному пользователю
+            if (!task.get().getAppUser().equals(user)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("Task number " + taskId + " does not belong to user " + username);
+            }
+            return ResponseEntity.ok(task.get());
         }
     }
 
 
 
-    @DeleteMapping("/task/{taskId}")
-    public void deleteTask(@PathVariable long taskId) {
+    @DeleteMapping("/delete/{taskId}")
+    public String deleteTask(@PathVariable String username, @PathVariable long taskId) {
+        AppUser user = userService.getUserByUsername(username);
+        if (user == null) {
+            System.out.println("User with username " + username + " not found");
+        }
+        Task taskToDelete = taskService.getTaskById(taskId).orElseThrow(() ->
+                new RuntimeException("Task with id " + taskId + " not found"));
+        if (!taskToDelete.getAppUser().equals(user)) {
+            return "task number " + taskId + " doesnt belong to user";
+        }
         taskService.deleteById(taskId);
+        return taskId + " task has been deleted";
     }
 
 

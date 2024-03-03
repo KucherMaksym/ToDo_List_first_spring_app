@@ -7,11 +7,11 @@ import java.util.List;
 
 public interface UserRepository extends JpaRepository<AppUser, Long> {
 
-    AppUser findAppUserById(long id);
+    AppUser findAppUserByUsername(String username);
 
     List<AppUser> findAll();
-    AppUser save(AppUser AppUser);
+    AppUser save(AppUser appUser);
 
-    void delete(AppUser AppUser);
+    void deleteById(long userId);
 
 }

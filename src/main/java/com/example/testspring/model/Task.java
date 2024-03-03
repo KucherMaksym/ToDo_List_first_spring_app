@@ -18,10 +18,8 @@ public class Task {
     private String description;
     private LocalDate dateCreation;
     private boolean isCompleted;
-
-    //@ManyToOne
-    //@JoinColumn(name = "user_id")
-    //private User user;
+    @ManyToOne
+    private AppUser appUser;
 
 
 

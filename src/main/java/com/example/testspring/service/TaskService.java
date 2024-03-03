@@ -1,8 +1,10 @@
 package com.example.testspring.service;
 
 
+import com.example.testspring.model.AppUser;
 import com.example.testspring.model.Task;
 import com.example.testspring.repository.TaskRepository;
+import com.example.testspring.repository.UserRepository;
 import jakarta.persistence.Id;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,8 @@ public class TaskService {
 
     @Transactional
     public Task createTask(Task task){
+        //AppUser user = userRepository.findAppUserById();
+        //task.setAppUser(user);
         return taskRepository.save(task);
     }
 
