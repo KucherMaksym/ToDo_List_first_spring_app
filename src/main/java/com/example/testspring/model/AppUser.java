@@ -3,7 +3,6 @@ package com.example.testspring.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import jakarta.persistence.*;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +11,6 @@ import java.util.List;
 @Entity
 @Table
 public class AppUser {
-
     @Id
     @GeneratedValue
     public Long id;
@@ -20,10 +18,9 @@ public class AppUser {
     private String username;
     private String password;
     private LocalDate birthDate;
-    @Column(unique = true)
+    @Column(unique = true)//
     private String email;
     @Transient
-    private int age;
     @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL)
     @JsonIgnore // Игнорировать это поле при сериализации,
     // иначе будет возвращать огромный повторяющийся json

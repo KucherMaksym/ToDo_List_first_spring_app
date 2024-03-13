@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")//разрешает делать запрос только с этого сайта
 @RequestMapping("/user")
 public class UserController {
 
@@ -36,10 +37,5 @@ public class UserController {
         userService.deleteUser(userId);
     }
 
-    //в гпт подсказка как переделать таски под каждого пользователя
-    //в гпт подсказка как переделать таски под каждого пользователя
-    //в гпт подсказка как переделать таски под каждого пользователя
-    //в гпт подсказка как переделать таски под каждого пользователя
-    //в гпт подсказка как переделать таски под каждого пользователя
 
 }
