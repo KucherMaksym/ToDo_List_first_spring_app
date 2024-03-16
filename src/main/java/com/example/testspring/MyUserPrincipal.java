@@ -1,19 +1,29 @@
 package com.example.testspring;
 
 import com.example.testspring.model.AppUser;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
+
+@Data
+@AllArgsConstructor
 public class MyUserPrincipal implements UserDetails {
 
+    private Long id;
+    private String username;
+    private String password;
 
 
-    private AppUser user;
 
-    public MyUserPrincipal(AppUser user) {
-        this.user = user;
+    public static MyUserPrincipal build(AppUser user) {
+        return new MyUserPrincipal(
+                user.getId(),
+                user.getUsername(),
+                user.getPassword());
     }
 
     @Override
@@ -23,7 +33,7 @@ public class MyUserPrincipal implements UserDetails {
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        return password;
     }
 
     @Override
@@ -33,7 +43,7 @@ public class MyUserPrincipal implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getUsername();
+        return username;
     }
 
     @Override

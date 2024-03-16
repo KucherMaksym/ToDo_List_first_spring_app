@@ -31,7 +31,7 @@ public class UserService  implements UserDetailsService {
         if (appUser == null) {
             throw new UsernameNotFoundException("User not found with username: " + username);
         }
-        return new MyUserPrincipal(appUser);
+        return MyUserPrincipal.build(appUser);
     }
 
     @Transactional
