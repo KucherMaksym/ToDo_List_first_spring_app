@@ -2,9 +2,11 @@
 testing:
   app:
     secret: opwjde
-    lifetime: 60000
+    lifetime: 6000000
 
 spring:
+  main:
+    allow-circular-references: true
   datasource:
     url: jdbc:postgresql://localhost:5432/ToDoList
     username: postgres
