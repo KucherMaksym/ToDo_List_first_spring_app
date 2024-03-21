@@ -20,10 +20,9 @@ public class AppUser {
     private LocalDate birthDate;
     @Column(unique = true)//
     private String email;
-    @Transient
     @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL)
     @JsonIgnore // Игнорировать это поле при сериализации,
-    // иначе будет возвращать огромный повторяющийся json
+//    // иначе будет возвращать огромный повторяющийся json
     private List<Task> userTasks = new ArrayList<Task>();
 
 }

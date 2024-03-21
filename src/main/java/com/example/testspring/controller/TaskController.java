@@ -13,12 +13,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
 
 @RestController
 @RequestMapping("/{username}/tasks")
+@CrossOrigin(origins = "http://localhost:3000")
 public class TaskController {
 
     private final TaskService taskService;
@@ -30,25 +32,42 @@ public class TaskController {
         this.userService = userService;
     }
 
+    public String getOnlyName(Principal principal) {
+        int startIndex = principal.getName().indexOf("username=") + "username=".length();
+        int endIndex = principal.getName().indexOf(",", startIndex);
+        return principal.getName().substring(startIndex, endIndex);
+    }
+
+//    @GetMapping("/all")
+//    public List<Task> getAllTaskForUser(@PathVariable String username) {
+//        AppUser user = userService.getUserByUsername(username);
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String currentUsername = getOnlyName(authentication);
+//        if (!currentUsername.equals(username)) {
+//            throw new AccessDeniedException("Доступ запрещен");
+//        }
+//        if (user == null) {
+//            System.out.println("User with username " + username + " not found");
+//        }
+//
+//        List<Task> userTasks = user.getUserTasks();
+//        return userTasks;
+//    }
+
+
     @GetMapping("/all")
-    public List<Task> getAllTaskForUser(@PathVariable String username) {
+    public ResponseEntity<?> getAllTaskForUser(@PathVariable String username) {
         AppUser user = userService.getUserByUsername(username);
-
-
-        //получаем имя аутентифицированного юзера. если оно не равно
-        //имени, указанным в url, на который он пытается попасть,
-        //выкидывается exception 🔱🔱🔱
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUsername = authentication.getName();
-        if (!currentUsername.equals(username)) {
-            throw new AccessDeniedException("Доступ запрещен");
-        }
         if (user == null) {
-            System.out.println("User with username " + username + " not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("User with username " + username + " not found");
         }
-
         List<Task> userTasks = user.getUserTasks();
-        return userTasks;
+        if (userTasks.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                    .body("No tasks found for user " + username);
+        }
+        return ResponseEntity.ok(userTasks);
     }
 
     @PostMapping("/create")
@@ -74,7 +93,7 @@ public class TaskController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("Task number " + taskId + " is not found for user " + username);
         } else {
-            // Проверяем, принадлежит ли задача указанному пользователю
+            // Проверка, принадлежит ли задача указанному пользователю
             if (!task.get().getAppUser().equals(user)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body("Task number " + taskId + " does not belong to user " + username);
@@ -86,6 +105,7 @@ public class TaskController {
 
 
     @DeleteMapping("/delete/{taskId}")
+    @CrossOrigin(origins = "http://localhost:3000")
     public String deleteTask(@PathVariable String username, @PathVariable long taskId) {
         AppUser user = userService.getUserByUsername(username);
         if (user == null) {
