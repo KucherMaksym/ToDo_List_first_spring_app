@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.swing.text.html.Option;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
@@ -79,6 +80,17 @@ public class TaskController {
         task.setAppUser(user);
         Task newTask = taskService.createTask(task);
         return newTask;
+    }
+
+    @PatchMapping("/completed/{id}")// я делаю toggle isCompleted задачи не смотря на его статус. потом изменить
+    public Task ToggleCompleted(@PathVariable Long id) {
+        Optional<Task> optionalTask = taskService.getTaskById(id);
+        Task task = null;
+        if (optionalTask.isPresent()) {
+            task = optionalTask.get();
+            task.setCompleted(!task.isCompleted());
+        }
+        return taskService.updateTask(task);
     }
 
 
